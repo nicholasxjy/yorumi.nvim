@@ -1,34 +1,39 @@
+local palette = require("yorumi.colors")
 local M = {}
 
 ---@class YorumiConfig
 M.config = {
-  undercurl = true,
-  commentStyle = { italic = false },
-  functionStyle = {},
-  keywordStyle = {},
-  statementStyle = {},
-  typeStyle = {},
-  dimInactive = false,
-  terminalColors = false,
-  ---@type { dark: string, light: string}
-  background = { dark = "abyss", light = "mist" },  --- light, mist theme coming soon
-  theme = "abyss",
+	undercurl = true,
+	commentStyle = { italic = false },
+	functionStyle = {},
+	keywordStyle = {},
+	statementStyle = {},
+	typeStyle = {},
+	dimInactive = false,
+	terminalColors = false,
+	---@type { dark: string, light: string}
+	background = { dark = "abyss", light = "mist" }, --- light, mist theme coming soon
+	theme = "abyss",
+	overrides = function(colors) end,
 }
 
----@param theme? string
-function M.load(theme)
-  local config = M.config
-  theme = theme or M.config.background[vim.o.background] or M.config.theme
-  M._CURRENT_THEME = theme
+function M.load(opts)
+	local config = vim.tbl_deep_extend("force", M.config, opts)
 
-  if vim.g.colors_name then
-    vim.cmd("hi clear")
-  end
+	local theme = config.theme or config.background[vim.o.background]
 
-  vim.g.colors_name = "yorumi"
-  vim.o.termguicolors = true
+	M._CURRENT_THEME = theme
 
-  require("yorumi.highlights").apply(config)
+	if vim.g.colors_name then
+		vim.cmd("hi clear")
+	end
+
+	vim.g.colors_name = "yorumi"
+	vim.o.termguicolors = true
+
+	require("yorumi.highlights").apply(config)
+
+	config.overrides(palette)
 end
 
 return M
